@@ -1,0 +1,9 @@
+*.s*
+*.pdb
+*.dll
+*.cache
+./bin/*
+./obj/*
+*/obj/*
+*/bin/*
+
