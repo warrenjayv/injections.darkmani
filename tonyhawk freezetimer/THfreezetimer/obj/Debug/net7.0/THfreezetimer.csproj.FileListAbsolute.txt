@@ -1,0 +1,14 @@
+d:\umbraproeliator drive\darkman_interactive\apdev.darkmani\injections\tonyhawk freezetimer\THfreezetimer\bin\Debug\net7.0\THfreezetimer.exe
+d:\umbraproeliator drive\darkman_interactive\apdev.darkmani\injections\tonyhawk freezetimer\THfreezetimer\bin\Debug\net7.0\THfreezetimer.deps.json
+d:\umbraproeliator drive\darkman_interactive\apdev.darkmani\injections\tonyhawk freezetimer\THfreezetimer\bin\Debug\net7.0\THfreezetimer.runtimeconfig.json
+d:\umbraproeliator drive\darkman_interactive\apdev.darkmani\injections\tonyhawk freezetimer\THfreezetimer\bin\Debug\net7.0\THfreezetimer.dll
+d:\umbraproeliator drive\darkman_interactive\apdev.darkmani\injections\tonyhawk freezetimer\THfreezetimer\bin\Debug\net7.0\THfreezetimer.pdb
+d:\umbraproeliator drive\darkman_interactive\apdev.darkmani\injections\tonyhawk freezetimer\THfreezetimer\obj\Debug\net7.0\THfreezetimer.GeneratedMSBuildEditorConfig.editorconfig
+d:\umbraproeliator drive\darkman_interactive\apdev.darkmani\injections\tonyhawk freezetimer\THfreezetimer\obj\Debug\net7.0\THfreezetimer.AssemblyInfoInputs.cache
+d:\umbraproeliator drive\darkman_interactive\apdev.darkmani\injections\tonyhawk freezetimer\THfreezetimer\obj\Debug\net7.0\THfreezetimer.AssemblyInfo.cs
+d:\umbraproeliator drive\darkman_interactive\apdev.darkmani\injections\tonyhawk freezetimer\THfreezetimer\obj\Debug\net7.0\THfreezetimer.csproj.CoreCompileInputs.cache
+d:\umbraproeliator drive\darkman_interactive\apdev.darkmani\injections\tonyhawk freezetimer\THfreezetimer\obj\Debug\net7.0\THfreezetimer.dll
+d:\umbraproeliator drive\darkman_interactive\apdev.darkmani\injections\tonyhawk freezetimer\THfreezetimer\obj\Debug\net7.0\refint\THfreezetimer.dll
+d:\umbraproeliator drive\darkman_interactive\apdev.darkmani\injections\tonyhawk freezetimer\THfreezetimer\obj\Debug\net7.0\THfreezetimer.pdb
+d:\umbraproeliator drive\darkman_interactive\apdev.darkmani\injections\tonyhawk freezetimer\THfreezetimer\obj\Debug\net7.0\THfreezetimer.genruntimeconfig.cache
+d:\umbraproeliator drive\darkman_interactive\apdev.darkmani\injections\tonyhawk freezetimer\THfreezetimer\obj\Debug\net7.0\ref\THfreezetimer.dll
