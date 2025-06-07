@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 #pragma warning disable CS8981
 
@@ -7,9 +8,44 @@ namespace utility
 {
   public class proctor
   {
+    [DllImport("kernel32.dll")]
+    public static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
+
+    [DllImport("kernel32.dll")]
+    public static extern bool ReadProcessMemory(int hProcess, int IpBaseAddress, byte[] IpBuffer, int dwSize, ref int IpNumberOfBytesRead);
+    const int PROCESS_WM_READ = 0x0010;
+    const int PROCESS_VM_WRITE = 0x0020;
+    const int PROCESS_ALL_ACCESS = 0x01F0FFF;
+
+    static Int64 instrOFF = Convert.ToInt64("46585A", 16);
+    static Int64 instrINJ = Convert.ToInt64("E9085840FC", 16);
+
     public static string target = "THHDGame";
 
     public static int id = 0;
+
+    public static void inject()
+    {
+
+      writer.write("• initiating injection...", color.blue);
+      Process proc = Process.GetProcessById(id);
+
+      IntPtr procHND = OpenProcess(PROCESS_ALL_ACCESS, false, proc.Id);
+
+      if (procHND == null)
+      {
+        writer.write("proctor.inject()<error>: failed to open process.", color.red);
+      }
+
+      IntPtr startOFF = proc.MainModule.BaseAddress;
+      IntPtr entryPNT = proc.MainModule.EntryPointAddress;
+      Int64 instADDR = startOFF + instrOFF; 
+      writer.write("• base address: " + startOFF.ToString(), color.blue);
+      writer.write("• instruction address: " + instADDR.ToString(), color.blue );
+
+      
+
+    }
 
     public static void findtarget()
     {
@@ -54,6 +90,6 @@ namespace utility
       }
 
     }
-    
+
   }
 }
