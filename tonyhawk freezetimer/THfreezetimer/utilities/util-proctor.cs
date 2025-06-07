@@ -13,9 +13,18 @@ namespace utility
 
     [DllImport("kernel32.dll")]
     public static extern bool ReadProcessMemory(int hProcess, int IpBaseAddress, byte[] IpBuffer, int dwSize, ref int IpNumberOfBytesRead);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr IpAddress, uint dwSize, uint flAllocationType, uint flProtect);
+
+    const int PAGE_READWRITE = 0x40;
     const int PROCESS_WM_READ = 0x0010;
     const int PROCESS_VM_WRITE = 0x0020;
     const int PROCESS_ALL_ACCESS = 0x01F0FFF;
+
+    const int MEM_COMMIT = 0x1000;
+    const int MEM_RELEASE = 0x800;
+    const int MEM_RESERVE = 0x2000;
 
     static Int64 instrOFF = Convert.ToInt64("46585A", 16);
     static Int64 instrINJ = Convert.ToInt64("E9085840FC", 16);
@@ -26,7 +35,7 @@ namespace utility
 
     public static void inject()
     {
-
+      // PHASE ONE
       writer.write("• initiating injection...", color.blue);
       Process proc = Process.GetProcessById(id);
 
@@ -39,11 +48,19 @@ namespace utility
 
       IntPtr startOFF = proc.MainModule.BaseAddress;
       IntPtr entryPNT = proc.MainModule.EntryPointAddress;
-      Int64 instADDR = startOFF + instrOFF; 
+      Int64 instADDR = startOFF + instrOFF;
       writer.write("• base address: " + startOFF.ToString(), color.blue);
-      writer.write("• instruction address: " + instADDR.ToString(), color.blue );
+      writer.write("• instruction address: " + instADDR.ToString(), color.blue);
 
-      
+      // PHASE TWO
+      writer.write("• allocate shellcode...", color.blue);
+      IntPtr allocADDR = VirtualAllocEx(proc.Handle, 0,  1000, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+      if (allocADDR == 0)
+      {
+        writer.write("proctor.inject()<error>: FAILED to allocate shellcode.", color.red);
+        return;
+      }
+
 
     }
 
