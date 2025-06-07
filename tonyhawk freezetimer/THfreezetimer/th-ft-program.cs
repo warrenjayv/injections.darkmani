@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using utility;
 
 #pragma warning disable CS8981 
 namespace freezetimer
@@ -18,9 +19,8 @@ namespace freezetimer
     static void Main()
     {
       booter.set_environment();
-      utility.color.set(ConsoleColor.Blue);
-      titler.generator.print("trump");
-      utility.color.set(ConsoleColor.White);
+      titler.generator.print_title();
+      proctor.findtarget();
 
       while (true) { }
     }

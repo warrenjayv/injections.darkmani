@@ -1,4 +1,5 @@
 using System;
+using utility;
 
 #pragma warning disable CS8981
 
@@ -27,6 +28,28 @@ namespace freezetimer
             Console.WriteLine(err);
             break;
         }
+      }
+
+      public static void print_title()
+      {
+        color.set(color.blue);
+        // show logo
+        switch (switchboard.flags.LIBERAL)
+        {
+          case 0:
+            writer.write(trump, color.blue);
+            break;
+          case 1:
+            Console.WriteLine(girl);
+            break;
+          default:
+            Console.WriteLine(trump);
+            break;
+        }
+
+        // show author & title
+        writer.write("TONYHAWK FREEZE TIMER 1.0", color.blue);
+        writer.write("cashapp: $dogFANG", color.blue);
       }
     }
   }
