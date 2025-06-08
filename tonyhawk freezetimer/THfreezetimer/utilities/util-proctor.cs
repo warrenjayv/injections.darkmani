@@ -17,6 +17,9 @@ namespace utility
     [DllImport("kernel32.dll", SetLastError = true)]
     static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr IpAddress, uint dwSize, uint flAllocationType, uint flProtect);
 
+    [DllImport("kernel32.dll")]
+    static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint nSize, out int wSize);
+
     const int PAGE_READWRITE = 0x40;
     const int PROCESS_WM_READ = 0x0010;
     const int PROCESS_VM_WRITE = 0x0020;
@@ -28,6 +31,8 @@ namespace utility
 
     static Int64 instrOFF = Convert.ToInt64("46585A", 16);
     static Int64 instrINJ = Convert.ToInt64("E9085840FC", 16);
+
+    public static byte[] shellcode = Convert.FromHexString("E9085840FC");
 
     public static string target = "THHDGame";
 
@@ -44,26 +49,38 @@ namespace utility
       if (procHND == null)
       {
         writer.write("proctor.inject()<error>: failed to open process.", color.red);
+        return;
       }
 
+      writer.write("process opened.", color.blue);
       IntPtr startOFF = proc.MainModule.BaseAddress;
       IntPtr entryPNT = proc.MainModule.EntryPointAddress;
       Int64 instADDR = startOFF + instrOFF;
-      writer.write("• base address: " + startOFF.ToString(), color.blue);
-      writer.write("• instruction address: " + instADDR.ToString(), color.blue);
+      writer.write("• base address: " + startOFF.ToString("X"), color.blue);
+      writer.write("• instruction address: " + instADDR.ToString("X"), color.blue);
 
       // PHASE TWO
       writer.write("• allocate shellcode...", color.blue);
-      IntPtr allocADDR = VirtualAllocEx(proc.Handle, 0,  1000, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+      IntPtr allocADDR = VirtualAllocEx(proc.Handle, 0, 1000, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
       if (allocADDR == 0)
       {
         writer.write("proctor.inject()<error>: FAILED to allocate shellcode.", color.red);
         return;
       }
+      writer.write(" • shellcode address: " + allocADDR.ToString("X"), color.blue);
 
+      int wBytes = 0;
+
+      if (WriteProcessMemory(proc.Handle, allocADDR, shellcode, (uint)shellcode.Length, out wBytes))
+      {
+        writer.write(wBytes.ToString() + " bytes written.", color.blue);
+      }
+      else
+      {
+        writer.write("proctor.inject()<error>: FAILED to allocate shellcode.", color.red);
+      }
 
     }
-
     public static void findtarget()
     {
       Process[] pARR = Process.GetProcessesByName(target);

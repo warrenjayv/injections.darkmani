@@ -21,7 +21,14 @@ namespace freezetimer
       booter.set_environment();
       titler.generator.print_title();
       proctor.findtarget();
-      proctor.inject();
+      try
+      {
+         proctor.inject();
+      }
+      catch (Exception e)
+      {
+        writer.write(e.Message, color.red);
+      }
 
       while (true) { }
     }
