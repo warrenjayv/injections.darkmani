@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Buffers.Binary;
 
 #pragma warning disable CS8981
 
@@ -40,6 +41,7 @@ namespace utility
 
     public static void inject()
     {
+
       // PHASE ONE
       writer.write("• initiating injection...", color.blue);
       Process proc = Process.GetProcessById(id);
@@ -71,14 +73,28 @@ namespace utility
 
       int wBytes = 0;
 
-      if (WriteProcessMemory(proc.Handle, allocADDR, shellcode, (uint)shellcode.Length, out wBytes))
+      if (WriteProcessMemory(proc.Handle, (IntPtr)allocADDR, shellcode, (uint)shellcode.Length, out wBytes))
       {
-        writer.write(wBytes.ToString() + " bytes written.", color.blue);
+        writer.write("• " + wBytes.ToString() + " bytes written.", color.blue);
       }
       else
       {
         writer.write("proctor.inject()<error>: FAILED to allocate shellcode.", color.red);
       }
+
+      // PHASE THREE
+      writer.write("• assemble jump instruction...", color.blue);
+      byte[] jmp = new byte[] { 0xE9 }.Concat(BitConverter.GetBytes((int)allocADDR).Reverse()).ToArray();
+      
+      if (WriteProcessMemory(proc.Handle, (IntPtr)instADDR, jmp, (uint)jmp.Length, out wBytes))
+      {
+        writer.write("• " + BitConverter.ToString(jmp), color.blue); 
+      }
+      else
+      {
+        writer.write("proctor.inject()<error>: FAILED to assemble jump instruction.", color.red);
+      }
+
 
     }
     public static void findtarget()
