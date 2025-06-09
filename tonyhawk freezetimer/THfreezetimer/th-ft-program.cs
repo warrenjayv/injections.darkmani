@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+
+using freezetimer.switchboard;
 using utility;
 
 #pragma warning disable CS8981 
@@ -20,17 +22,20 @@ namespace freezetimer
     {
       booter.set_environment();
       titler.generator.print_title();
-      try
+      writer.write("type /h to see commands", color.gray);
+      while (true)
       {
-         proctor.findtarget();
-         proctor.inject();
-      }
-      catch (Exception e)
-      {
-        writer.write(e.Message, color.red);
+        try
+        {
+
+          response.read_command(Console.ReadLine());
+        }
+        catch (Exception e)
+        {
+          writer.write(e.Message, color.red);
+        }
       }
 
-      while (true) { }
     }
   }
 }

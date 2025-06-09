@@ -5,6 +5,8 @@ using System.Buffers.Binary;
 
 #pragma warning disable CS8981
 
+using freezetimer.switchboard;
+
 namespace utility
 {
   public class proctor
@@ -40,24 +42,23 @@ namespace utility
     static Int64 instrINJ = Convert.ToInt64("E90858C9FE", 16);
 
     // public static byte[] shellcode = Convert.FromHexString("E90858C9FE"); 
-    public static byte[] original_code  = Convert.FromHexString("890E7CF2EBAD");
+    public static byte[] original_code = Convert.FromHexString("890E7CF2EBAD");
 
     public static string target = "THHDGame";
 
     public static int id = 0;
 
     public static Process procPTR;
-    public static IntPtr  procHND;
-    public static IntPtr  startOFF;
-    public static IntPtr  entryPNT;
-    public static Int64   instADDR;
-    public static IntPtr  allocADDR;
-
-
+    public static IntPtr procHND;
+    public static IntPtr startOFF;
+    public static IntPtr entryPNT;
+    public static Int64 instADDR;
+    public static IntPtr allocADDR;
 
     public static void inject()
     {
-
+      
+      writer.write("• injecting...", color.blue);
       writer.write("• allocate shellcode...", color.blue);
       IntPtr allocADDR = VirtualAllocEx(procPTR.Handle, 0, 1000, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
       if (allocADDR == 0)
@@ -102,6 +103,7 @@ namespace utility
         writer.write("proctor.inject()<error>: FAILED to assemble jump instruction.", color.red);
       }
 
+      flags.INJECTED = 1;
 
     }
     public static void findtarget()
@@ -146,8 +148,8 @@ namespace utility
         writer.write("target found. " + "[" + id.ToString() + "]", color.green);
       }
 
-      writer.write("• initiating injection...", color.blue);
-      procPTR  = Process.GetProcessById(id);
+      writer.write("• attaching to process...", color.blue);
+      procPTR = Process.GetProcessById(id);
 
       procHND = OpenProcess(PROCESS_ALL_ACCESS, false, procPTR.Id);
 
@@ -166,7 +168,13 @@ namespace utility
       instADDR = startOFF + instrOFF;
       writer.write("• instruction address: " + instADDR.ToString("X"), color.blue);
 
+      flags.FOUND = 1;
     }
+
+    public static void eject()
+    {
+      flags.INJECTED = 0;
+    } 
 
   }
 }
