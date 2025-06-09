@@ -30,10 +30,17 @@ namespace utility
     const int MEM_RELEASE = 0x800;
     const int MEM_RESERVE = 0x2000;
 
+    /* instruction offset */
     static Int64 instrOFF = Convert.ToInt64("46585A", 16);
-    static Int64 instrINJ = Convert.ToInt64("E9085840FC", 16);
 
-    public static byte[] shellcode = Convert.FromHexString("E9085840FC");
+    /* shell offset */
+    static Int64 shellOFF = Convert.ToInt64("46580D", 16);
+
+    /* injection bytecode ~ dont use, it is hardcoded */
+    static Int64 instrINJ = Convert.ToInt64("E90858C9FE", 16);
+
+    // public static byte[] shellcode = Convert.FromHexString("E90858C9FE"); 
+    public static byte[] original_code  = Convert.FromHexString("890E7CF2EBAD");
 
     public static string target = "THHDGame";
 
@@ -57,8 +64,10 @@ namespace utility
       writer.write("process opened.", color.blue);
       IntPtr startOFF = proc.MainModule.BaseAddress;
       IntPtr entryPNT = proc.MainModule.EntryPointAddress;
-      Int64 instADDR = startOFF + instrOFF;
+
       writer.write("• base address: " + startOFF.ToString("X"), color.blue);
+
+      Int64 instADDR = startOFF + instrOFF;
       writer.write("• instruction address: " + instADDR.ToString("X"), color.blue);
 
       // PHASE TWO
@@ -69,9 +78,17 @@ namespace utility
         writer.write("proctor.inject()<error>: FAILED to allocate shellcode.", color.red);
         return;
       }
-      writer.write(" • shellcode address: " + allocADDR.ToString("X"), color.blue);
+      writer.write("  shellcode address: " + allocADDR.ToString("X"), color.blue);
 
       int wBytes = 0;
+
+      /* assemble shell code */
+      writer.write(" • assembling shell code: " + allocADDR.ToString("X"), color.blue);
+      /* remember, the address is relative here...*/
+      Int64 offset = (startOFF + shellOFF) -allocADDR;
+      byte[] shellcode = new byte[] { 0xE9 }.Concat(BitConverter.GetBytes(offset - 5)).ToArray();
+      writer.write("• shell code: " + BitConverter.ToString(shellcode), color.blue);
+      //byte[] shellcode = new byte[] { 0xE9, 0x0 };
 
       if (WriteProcessMemory(proc.Handle, (IntPtr)allocADDR, shellcode, (uint)shellcode.Length, out wBytes))
       {
@@ -84,14 +101,14 @@ namespace utility
 
       // PHASE THREE
       writer.write("• assemble jump instruction...", color.blue);
-      int offset = (int)(allocADDR - instADDR);
+      offset = (int)(allocADDR - instADDR);
       writer.write("• offset: " + offset.ToString("X"), color.blue);
-      byte[] jmp = new byte[] { 0xE9 }.Concat(BitConverter.GetBytes(offset-5)).ToArray();
+      byte[] jmp = new byte[] { 0xE9 }.Concat(BitConverter.GetBytes(offset-5)).Concat(new byte[] { 0x90 }).ToArray();
       //byte[] jmp = new byte[] { 0XE9, 0x00, 0x00, 0x00, 0x00 };
       
       if (WriteProcessMemory(proc.Handle, (IntPtr)instADDR, jmp, (uint)jmp.Length, out wBytes))
       {
-        writer.write("• " + BitConverter.ToString(jmp), color.blue);
+        writer.write("• jump code: " + BitConverter.ToString(jmp), color.blue);
       }
       else
       {
