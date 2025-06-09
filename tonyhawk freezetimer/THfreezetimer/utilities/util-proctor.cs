@@ -85,7 +85,7 @@ namespace utility
       /* assemble shell code */
       writer.write(" • assembling shell code: " + allocADDR.ToString("X"), color.blue);
       /* remember, the address is relative here...*/
-      Int64 offset = (startOFF + shellOFF) -allocADDR;
+      int offset = (int)(startOFF + shellOFF) - (int)allocADDR;
       byte[] shellcode = new byte[] { 0xE9 }.Concat(BitConverter.GetBytes(offset - 5)).ToArray();
       writer.write("• shell code: " + BitConverter.ToString(shellcode), color.blue);
       //byte[] shellcode = new byte[] { 0xE9, 0x0 };
