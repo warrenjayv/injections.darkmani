@@ -12,6 +12,9 @@ namespace utility
   public class proctor
   {
     [DllImport("kernel32.dll")]
+    static extern int GetLastError();
+
+    [DllImport("kernel32.dll")]
     public static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
 
     [DllImport("kernel32.dll")]
@@ -42,7 +45,7 @@ namespace utility
     static Int64 instrINJ = Convert.ToInt64("E90858C9FE", 16);
 
     // public static byte[] shellcode = Convert.FromHexString("E90858C9FE"); 
-    public static byte[] original_code = Convert.FromHexString("890E7CF2EBAD");
+    public static byte[] original_code = new byte[5];
 
     public static string target = "THHDGame";
 
@@ -57,8 +60,28 @@ namespace utility
 
     public static void inject()
     {
+      int wBytes = 0;
+      int rBytes = 0;
+
+      // STORE ORIGINAL CODE
+      writer.write("• storing original code...", color.blue);
+      ReadProcessMemory((int)procPTR.Handle, (int)instADDR, original_code, original_code.Length, ref rBytes);
       
-      writer.write("• injecting...", color.blue);
+      if ( rBytes > 0 )
+      {
+        writer.write("• " + rBytes.ToString() + " bytes read. code: " + BitConverter.ToString(original_code), color.blue);
+
+      }
+      else
+      {
+        int errCODE = GetLastError( );
+        writer.write("proctor.inject()<error>: FAILED to read original code.", color.red);
+        writer.write(String.Format("system error code: {0}", errCODE), color.red);
+        return;
+      }
+      
+      // ALLOCATE SHELLCODE ADDRESS {  }
+        writer.write("• injecting...", color.blue);
       writer.write("• allocate shellcode...", color.blue);
       IntPtr allocADDR = VirtualAllocEx(procPTR.Handle, 0, 1000, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
       if (allocADDR == 0)
@@ -68,9 +91,7 @@ namespace utility
       }
       writer.write("• shellcode address: " + allocADDR.ToString("X"), color.blue);
 
-      int wBytes = 0;
-
-      /* assemble shell code */
+      // ASSEMBLE SHELLCODE {  } 
       writer.write(" • assembling shell code: " + allocADDR.ToString("X"), color.blue);
       /* remember, the address is relative here...*/
       int offset = (int)(startOFF + shellOFF) - (int)allocADDR;
@@ -87,7 +108,7 @@ namespace utility
         writer.write("proctor.inject()<error>: FAILED to allocate shellcode.", color.red);
       }
 
-      // PHASE THREE
+      // ASSEMBLE JUMP ADDRESS {  }
       writer.write("• assemble jump instruction...", color.blue);
       offset = (int)(allocADDR - instADDR);
       writer.write("• offset: " + offset.ToString("X"), color.blue);
