@@ -23,6 +23,9 @@ namespace utility
     [DllImport("kernel32.dll", SetLastError = true)]
     static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr IpAddress, uint dwSize, uint flAllocationType, uint flProtect);
 
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern bool VirtualFreeEx(IntPtr hProcess, IntPtr IpAddress, uint dwSize, uint lAllocationType);
+
     [DllImport("kernel32.dll")]
     static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint nSize, out int wSize);
 
@@ -32,7 +35,7 @@ namespace utility
     const int PROCESS_ALL_ACCESS = 0x01F0FFF;
 
     const int MEM_COMMIT = 0x1000;
-    const int MEM_RELEASE = 0x800;
+    const int MEM_RELEASE = 0x8000;
     const int MEM_RESERVE = 0x2000;
 
     /* instruction offset */
@@ -50,6 +53,9 @@ namespace utility
     public static string target = "THHDGame";
 
     public static int id = 0;
+
+    // size of the allocated shellcode. 
+    public static int allocSZ = 0;
 
     public static Process procPTR;
     public static IntPtr procHND;
@@ -83,7 +89,7 @@ namespace utility
       // ALLOCATE SHELLCODE ADDRESS {  }
         writer.write("• injecting...", color.blue);
       writer.write("• allocate shellcode...", color.blue);
-      IntPtr allocADDR = VirtualAllocEx(procPTR.Handle, 0, 1000, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+      allocADDR = VirtualAllocEx(procPTR.Handle, 0, 1000, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
       if (allocADDR == 0)
       {
         writer.write("proctor.inject()<error>: FAILED to allocate shellcode.", color.red);
@@ -92,11 +98,11 @@ namespace utility
       writer.write("• shellcode address: " + allocADDR.ToString("X"), color.blue);
 
       // ASSEMBLE SHELLCODE {  } 
-      writer.write(" • assembling shell code: " + allocADDR.ToString("X"), color.blue);
       /* remember, the address is relative here...*/
       int offset = (int)(startOFF + shellOFF) - (int)allocADDR;
       byte[] shellcode = new byte[] { 0xE9 }.Concat(BitConverter.GetBytes(offset - 5)).ToArray();
-      writer.write("• shell code: " + BitConverter.ToString(shellcode), color.blue);
+      allocSZ = shellcode.Length;
+      writer.write("• assembling shell code: " + BitConverter.ToString(shellcode), color.blue);
       //byte[] shellcode = new byte[] { 0xE9, 0x0 };
 
       if (WriteProcessMemory(procPTR.Handle, (IntPtr)allocADDR, shellcode, (uint)shellcode.Length, out wBytes))
@@ -194,7 +200,22 @@ namespace utility
 
     public static void eject()
     {
+      // FREE SHELL CODE
+      if (VirtualFreeEx(procPTR.Handle, allocADDR, 0, MEM_RELEASE))
+      {
+        writer.write("• shellcode allocation ejected @ " + allocADDR.ToString("X"), color.green);
+      }
+      else
+      {
+        int errCODE = GetLastError( );
+        writer.write("proctor.eject()<error>: FAILED to free shellcode", color.red);
+        writer.write("address: " + allocADDR.ToString("X"), color.red);
+        writer.write(String.Format("system error code: {0}", errCODE), color.red);
+        return;
+      }
+
       flags.INJECTED = 0;
+      
     } 
 
   }
