@@ -84,11 +84,14 @@ namespace utility
 
       // PHASE THREE
       writer.write("• assemble jump instruction...", color.blue);
-      byte[] jmp = new byte[] { 0xE9 }.Concat(BitConverter.GetBytes((int)allocADDR).Reverse()).ToArray();
+      int offset = (int)(allocADDR - instADDR);
+      writer.write("• offset: " + offset.ToString("X"), color.blue);
+      byte[] jmp = new byte[] { 0xE9 }.Concat(BitConverter.GetBytes(offset-5)).ToArray();
+      //byte[] jmp = new byte[] { 0XE9, 0x00, 0x00, 0x00, 0x00 };
       
       if (WriteProcessMemory(proc.Handle, (IntPtr)instADDR, jmp, (uint)jmp.Length, out wBytes))
       {
-        writer.write("• " + BitConverter.ToString(jmp), color.blue); 
+        writer.write("• " + BitConverter.ToString(jmp), color.blue);
       }
       else
       {
