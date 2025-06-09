@@ -46,39 +46,26 @@ namespace utility
 
     public static int id = 0;
 
+    public static Process procPTR;
+    public static IntPtr  procHND;
+    public static IntPtr  startOFF;
+    public static IntPtr  entryPNT;
+    public static Int64   instADDR;
+    public static IntPtr  allocADDR;
+
+
+
     public static void inject()
     {
 
-      // PHASE ONE
-      writer.write("• initiating injection...", color.blue);
-      Process proc = Process.GetProcessById(id);
-
-      IntPtr procHND = OpenProcess(PROCESS_ALL_ACCESS, false, proc.Id);
-
-      if (procHND == null)
-      {
-        writer.write("proctor.inject()<error>: failed to open process.", color.red);
-        return;
-      }
-
-      writer.write("process opened.", color.blue);
-      IntPtr startOFF = proc.MainModule.BaseAddress;
-      IntPtr entryPNT = proc.MainModule.EntryPointAddress;
-
-      writer.write("• base address: " + startOFF.ToString("X"), color.blue);
-
-      Int64 instADDR = startOFF + instrOFF;
-      writer.write("• instruction address: " + instADDR.ToString("X"), color.blue);
-
-      // PHASE TWO
       writer.write("• allocate shellcode...", color.blue);
-      IntPtr allocADDR = VirtualAllocEx(proc.Handle, 0, 1000, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+      IntPtr allocADDR = VirtualAllocEx(procPTR.Handle, 0, 1000, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
       if (allocADDR == 0)
       {
         writer.write("proctor.inject()<error>: FAILED to allocate shellcode.", color.red);
         return;
       }
-      writer.write("  shellcode address: " + allocADDR.ToString("X"), color.blue);
+      writer.write("• shellcode address: " + allocADDR.ToString("X"), color.blue);
 
       int wBytes = 0;
 
@@ -90,7 +77,7 @@ namespace utility
       writer.write("• shell code: " + BitConverter.ToString(shellcode), color.blue);
       //byte[] shellcode = new byte[] { 0xE9, 0x0 };
 
-      if (WriteProcessMemory(proc.Handle, (IntPtr)allocADDR, shellcode, (uint)shellcode.Length, out wBytes))
+      if (WriteProcessMemory(procPTR.Handle, (IntPtr)allocADDR, shellcode, (uint)shellcode.Length, out wBytes))
       {
         writer.write("• " + wBytes.ToString() + " bytes written.", color.blue);
       }
@@ -103,10 +90,10 @@ namespace utility
       writer.write("• assemble jump instruction...", color.blue);
       offset = (int)(allocADDR - instADDR);
       writer.write("• offset: " + offset.ToString("X"), color.blue);
-      byte[] jmp = new byte[] { 0xE9 }.Concat(BitConverter.GetBytes(offset-5)).Concat(new byte[] { 0x90 }).ToArray();
+      byte[] jmp = new byte[] { 0xE9 }.Concat(BitConverter.GetBytes(offset - 5)).Concat(new byte[] { 0x90 }).ToArray();
       //byte[] jmp = new byte[] { 0XE9, 0x00, 0x00, 0x00, 0x00 };
-      
-      if (WriteProcessMemory(proc.Handle, (IntPtr)instADDR, jmp, (uint)jmp.Length, out wBytes))
+
+      if (WriteProcessMemory(procPTR.Handle, (IntPtr)instADDR, jmp, (uint)jmp.Length, out wBytes))
       {
         writer.write("• jump code: " + BitConverter.ToString(jmp), color.blue);
       }
@@ -158,6 +145,26 @@ namespace utility
         id = pARR[0].Id;
         writer.write("target found. " + "[" + id.ToString() + "]", color.green);
       }
+
+      writer.write("• initiating injection...", color.blue);
+      procPTR  = Process.GetProcessById(id);
+
+      procHND = OpenProcess(PROCESS_ALL_ACCESS, false, procPTR.Id);
+
+      if (procHND == null)
+      {
+        writer.write("proctor.inject()<error>: failed to open process.", color.red);
+        return;
+      }
+
+      writer.write("process opened.", color.blue);
+      startOFF = procPTR.MainModule.BaseAddress;
+      entryPNT = procPTR.MainModule.EntryPointAddress;
+
+      writer.write("• base address: " + startOFF.ToString("X"), color.blue);
+
+      instADDR = startOFF + instrOFF;
+      writer.write("• instruction address: " + instADDR.ToString("X"), color.blue);
 
     }
 

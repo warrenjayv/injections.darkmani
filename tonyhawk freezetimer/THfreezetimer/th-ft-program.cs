@@ -20,9 +20,9 @@ namespace freezetimer
     {
       booter.set_environment();
       titler.generator.print_title();
-      proctor.findtarget();
       try
       {
+         proctor.findtarget();
          proctor.inject();
       }
       catch (Exception e)
