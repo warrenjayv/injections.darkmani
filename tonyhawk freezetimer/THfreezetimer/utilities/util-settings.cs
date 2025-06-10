@@ -35,7 +35,7 @@ namespace utility
             _prse[j + 2] = val.ToString();
 
             _prms[i] = string.Join(" ", _prse);
-            _prms[i] += '\n';
+            _prms[i] += " \n";
             break;
           }
           
@@ -86,7 +86,7 @@ namespace utility
       using (FileStream _fs = new FileStream(_path, FileMode.Open, FileAccess.Write))
       using (StreamWriter _sw = new StreamWriter(_fs))
       {
-        _sw.Write(string.Join(' ', _prms));
+        _sw.Write(string.Join('\n', _prms));
 
         _sw.Close();
         _fs.Close();
