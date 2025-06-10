@@ -13,6 +13,7 @@ namespace freezetimer
     public static void set_environment()
     {
       Console.OutputEncoding = System.Text.Encoding.UTF8;
+       try { settings.set(); } catch (Exception e) { writer.write(e.Message, color.red); }
     }
   }
   class program
