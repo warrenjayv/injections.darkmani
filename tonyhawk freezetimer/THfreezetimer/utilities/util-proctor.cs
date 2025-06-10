@@ -72,19 +72,19 @@ namespace utility
       // STORE ORIGINAL CODE
       writer.write("• storing original code...", color.blue);
       ReadProcessMemory((int)procPTR.Handle, (int)instADDR, original_code, original_code.Length, ref rBytes);
-      
-      if ( rBytes > 0 )
+
+      if (rBytes > 0)
       {
         writer.write("• " + rBytes.ToString() + " bytes read. code: " + BitConverter.ToString(original_code), color.blue);
       }
       else
       {
-        int errCODE = GetLastError( );
+        int errCODE = GetLastError();
         writer.write("proctor.inject()<error>: FAILED to read original code.", color.red);
         writer.write(String.Format("system error code: {0}", errCODE), color.red);
         return;
       }
-      
+
       // ALLOCATE SHELLCODE ADDRESS {  }
       writer.write("• injecting...", color.blue);
       writer.write("• allocate shellcode...", color.blue);

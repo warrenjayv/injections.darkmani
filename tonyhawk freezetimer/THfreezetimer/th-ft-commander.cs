@@ -46,24 +46,28 @@ namespace freezetimer
     public static class response
     {
       static string h = "available commands:\n /f - FIND target program & attach if found\n /i - INJECT shellcode\n /e - EJECT shellcode\n /h - HELP - show command list";
+      static string w = "warning: only inject when in the scene/park (non-menu)";
       public static void read_command(string user)
       {
         switch (user)
         {
           case "/h":
             writer.write(h, color.gray);
+            writer.write(w, color.yellow);
             break;
           case "/f":
-            if ( flags.assert_found())    proctor.findtarget();
+            if (flags.assert_found()) proctor.findtarget();
             break;
           case "/i":
-            if ( flags.assert_injection()) proctor.inject();
+            if (flags.assert_injection()) proctor.inject();
             break;
           case "/e":
-            if ( flags.assert_ejection())  proctor.eject();
+            if (flags.assert_ejection()) proctor.eject();
             break;
           default:
             writer.write(h, color.gray);
+            writer.write(w, color.yellow);
+
             break;
         }
       }
