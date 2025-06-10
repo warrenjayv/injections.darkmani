@@ -48,7 +48,7 @@ namespace utility
     static Int64 instrINJ = Convert.ToInt64("E90858C9FE", 16);
 
     // public static byte[] shellcode = Convert.FromHexString("E90858C9FE"); 
-    public static byte[] original_code = new byte[5];
+    public static byte[] original_code = new byte[6];
 
     public static string target = "THHDGame";
 
