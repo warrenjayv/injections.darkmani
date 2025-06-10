@@ -45,7 +45,7 @@ namespace freezetimer
 
     public static class response
     {
-      static string h = "available commands:\n /f - FIND target program & attach if found\n /i - INJECT shellcode\n /e - EJECT shellcode\n /h - HELP - show command list";
+      static string h = "available commands:\n /f - FIND target program & attach if found\n /i - INJECT shellcode\n /e - EJECT shellcode\n /m - MODE changes the logo, 1 for liberal\n /h - HELP - show command list";
       static string w = "warning: only inject when in the scene/park (non-menu)";
       public static void read_command(string user)
       {
@@ -64,15 +64,34 @@ namespace freezetimer
           case "/e":
             if (flags.assert_ejection()) proctor.eject();
             break;
+          case "/m":
+            writer.write("LIBERAL mode? (1 or 0): ", color.gray);
+            settings.set("LIBERAL", read_number());
+            settings.update();
+            break;
           default:
             writer.write(h, color.gray);
             writer.write(w, color.yellow);
-
             break;
         }
       }
-      
+
+
+      public static int read_number()
+      {
+        int _n = 0;
+        try
+        {
+          string _in = Console.ReadLine();
+          _n = int.Parse(_in);
+        }
+        catch (FormatException)
+        {
+          writer.write("error! expecting a number", color.red);
+        }
+
+        return _n;
+      }
     }
-    
   }
 }
