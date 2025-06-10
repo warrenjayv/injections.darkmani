@@ -76,7 +76,6 @@ namespace utility
       if ( rBytes > 0 )
       {
         writer.write("• " + rBytes.ToString() + " bytes read. code: " + BitConverter.ToString(original_code), color.blue);
-
       }
       else
       {
@@ -87,7 +86,7 @@ namespace utility
       }
       
       // ALLOCATE SHELLCODE ADDRESS {  }
-        writer.write("• injecting...", color.blue);
+      writer.write("• injecting...", color.blue);
       writer.write("• allocate shellcode...", color.blue);
       allocADDR = VirtualAllocEx(procPTR.Handle, 0, 1000, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
       if (allocADDR == 0)
@@ -102,7 +101,7 @@ namespace utility
       int offset = (int)(startOFF + shellOFF) - (int)allocADDR;
       byte[] shellcode = new byte[] { 0xE9 }.Concat(BitConverter.GetBytes(offset - 5)).ToArray();
       allocSZ = shellcode.Length;
-      writer.write("• assembling shell code: " + BitConverter.ToString(shellcode), color.blue);
+      writer.write("• assembling shellcode: " + BitConverter.ToString(shellcode), color.blue);
       //byte[] shellcode = new byte[] { 0xE9, 0x0 };
 
       if (WriteProcessMemory(procPTR.Handle, (IntPtr)allocADDR, shellcode, (uint)shellcode.Length, out wBytes))
@@ -200,6 +199,7 @@ namespace utility
 
     public static void eject()
     {
+      
       // FREE SHELL CODE
       if (VirtualFreeEx(procPTR.Handle, allocADDR, 0, MEM_RELEASE))
       {
@@ -207,16 +207,26 @@ namespace utility
       }
       else
       {
-        int errCODE = GetLastError( );
+        int errCODE = GetLastError();
         writer.write("proctor.eject()<error>: FAILED to free shellcode", color.red);
         writer.write("address: " + allocADDR.ToString("X"), color.red);
         writer.write(String.Format("system error code: {0}", errCODE), color.red);
         return;
       }
 
-      flags.INJECTED = 0;
-      
-    } 
+      // RESTORE ORIGINAL CODE
+      int wBytes = 0;
 
+      if (WriteProcessMemory(procPTR.Handle, (IntPtr)instADDR, original_code, (uint)original_code.Length, out wBytes))
+      {
+        writer.write("• original code restored: " + BitConverter.ToString(original_code), color.blue); 
+      }
+      else
+      {
+        writer.write("proctor.inject()<error>: FAILED to assemble jump instruction.", color.red);
+      }
+
+      flags.INJECTED = 0;
+    } 
   }
 }
